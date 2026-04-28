@@ -2,15 +2,25 @@ package com.example.demo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -23,13 +33,32 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .cors(Customizer.withDefaults())
+
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+
             .authorizeHttpRequests(auth -> auth
+
+                // 🔓 Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
+
+                // 👨‍💼 ADMIN only
+                .requestMatchers(HttpMethod.POST, "/api/workshops/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/workshops/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/workshops/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/workshops/**").hasRole("ADMIN")
+
+                // 👤 Logged-in users
+                .requestMatchers(HttpMethod.GET, "/api/workshops/**").authenticated()
+                .requestMatchers("/api/registrations/**").authenticated()
+
+                // 🔐 Everything else
                 .anyRequest().authenticated()
             )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            );
+
+            // 🔥 JWT filter
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

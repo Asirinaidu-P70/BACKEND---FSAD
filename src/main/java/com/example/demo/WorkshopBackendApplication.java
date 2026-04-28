@@ -23,13 +23,16 @@ public class WorkshopBackendApplication {
 
     @PostConstruct
     public void initAdminUser() {
-        if (!userRepository.existsByEmail("admin@example.com")) {
-            User admin = new User();
-            admin.setName("Administrator");
-            admin.setEmail("admin@example.com");
+        User admin = userRepository.findByEmail("admin@example.com").orElseGet(User::new);
+
+        admin.setName("Administrator");
+        admin.setEmail("admin@example.com");
+        admin.setRole("ADMIN");
+
+        if (admin.getPassword() == null || !passwordEncoder.matches("admin123", admin.getPassword())) {
             admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setRole("admin");
-            userRepository.save(admin);
         }
+
+        userRepository.save(admin);
     }
 }

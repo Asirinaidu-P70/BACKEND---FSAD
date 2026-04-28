@@ -67,7 +67,7 @@ public class AuthController {
                     .body("Email already exists");
         }
 
-        String role = "user";
+        String role = "USER";
 
         User user = new User();
         user.setName(request.getFullName());
