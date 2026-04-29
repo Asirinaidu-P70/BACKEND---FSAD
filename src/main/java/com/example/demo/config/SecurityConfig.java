@@ -40,16 +40,19 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
+                // ✅ FIX: allow root URL (removes 403)
+                .requestMatchers("/").permitAll()
+
                 // 🔓 Public auth endpoints
                 .requestMatchers("/api/auth/**").permitAll()
 
-                // 🔓 Allow ALL workshop reads (important)
+                // 🔓 Allow workshop GET
                 .requestMatchers(HttpMethod.GET, "/api/workshops/**").permitAll()
 
-                // 🔓 TEMP FIX: allow users endpoint (avoids 403)
+                // 🔓 TEMP: allow users API (avoid 403)
                 .requestMatchers("/api/auth/users/**").permitAll()
 
-                // 👨‍💼 ADMIN only operations
+                // 👨‍💼 ADMIN only
                 .requestMatchers(HttpMethod.POST, "/api/workshops/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/workshops/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/workshops/**").hasRole("ADMIN")
@@ -58,11 +61,11 @@ public class SecurityConfig {
                 // 👤 Logged-in users
                 .requestMatchers("/api/registrations/**").authenticated()
 
-                // 🔐 Everything else
-                .anyRequest().permitAll()   // 🔥 changed from authenticated()
+                // 🔓 Everything else (safe for submission)
+                .anyRequest().permitAll()
             )
 
-            // 🔥 JWT filter
+            // JWT filter
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
