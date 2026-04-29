@@ -14,13 +14,12 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOriginPatterns(
+                        .allowedOrigins(
                                 "http://localhost:5173",
                                 "http://localhost:5175",
                                 "http://127.0.0.1:5173",
                                 "http://127.0.0.1:5175",
-                                "https://fsad-frontend-beryl.vercel.app",
-                                "https://*.vercel.app"
+                                "https://frontend-fsad-rust.vercel.app"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")

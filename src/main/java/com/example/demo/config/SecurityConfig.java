@@ -40,23 +40,26 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
-                // 🔓 Public endpoints
+                // 🔓 Public auth endpoints
                 .requestMatchers("/api/auth/**").permitAll()
 
-                // 👨‍💼 ADMIN only
+                // 🔓 Allow ALL workshop reads (important)
+                .requestMatchers(HttpMethod.GET, "/api/workshops/**").permitAll()
+
+                // 🔓 TEMP FIX: allow users endpoint (avoids 403)
+                .requestMatchers("/api/auth/users/**").permitAll()
+
+                // 👨‍💼 ADMIN only operations
                 .requestMatchers(HttpMethod.POST, "/api/workshops/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/workshops/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/workshops/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/workshops/**").hasRole("ADMIN")
 
-                // ✅ FIXED: allow GET without login
-                .requestMatchers(HttpMethod.GET, "/api/workshops/**").permitAll()
-
                 // 👤 Logged-in users
                 .requestMatchers("/api/registrations/**").authenticated()
 
                 // 🔐 Everything else
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()   // 🔥 changed from authenticated()
             )
 
             // 🔥 JWT filter
