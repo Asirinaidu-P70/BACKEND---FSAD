@@ -49,8 +49,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/api/workshops/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/workshops/**").hasRole("ADMIN")
 
+                // ✅ FIXED: allow GET without login
+                .requestMatchers(HttpMethod.GET, "/api/workshops/**").permitAll()
+
                 // 👤 Logged-in users
-                .requestMatchers(HttpMethod.GET, "/api/workshops/**").authenticated()
                 .requestMatchers("/api/registrations/**").authenticated()
 
                 // 🔐 Everything else
